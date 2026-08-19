@@ -25,6 +25,12 @@ int ibv_internal_query_port(struct ibv_context* context, uint8_t port_num, struc
   return ibv_query_port(context, port_num, port_attr);
 }
 
+// rdma-core's ibv_query_port_speed takes uint32_t port_num; NCCL's wrapper uses uint8_t
+// (same width as ibv_query_port).
+int ibv_internal_query_port_speed(struct ibv_context* context, uint8_t port_num, uint64_t* speed) {
+  return ibv_query_port_speed(context, port_num, speed);
+}
+
 ncclResult_t buildIbvSymbols(struct ncclIbvSymbols* ibvSymbols) {
   ASSIGN_SYM(ibvSymbols, ibv_get_device_list, ibv_internal_get_device_list);
   ASSIGN_SYM(ibvSymbols, ibv_free_device_list, ibv_internal_free_device_list);
@@ -53,10 +59,10 @@ ncclResult_t buildIbvSymbols(struct ncclIbvSymbols* ibvSymbols) {
 
   ASSIGN_SYM(ibvSymbols, ibv_query_ece, ibv_internal_query_ece);
   ASSIGN_SYM(ibvSymbols, ibv_set_ece, ibv_internal_set_ece);
-  ASSIGN_SYM(ibvSymbols, ibv_query_port_speed, ibv_internal_query_port_speed);
 
   ibvSymbols->ibv_internal_reg_mr = &ibv_internal_reg_mr;
   ibvSymbols->ibv_internal_query_port = &ibv_internal_query_port;
+  ibvSymbols->ibv_internal_query_port_speed = &ibv_internal_query_port_speed;
 
   return ncclSuccess;
 }
